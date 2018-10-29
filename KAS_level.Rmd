@@ -19,7 +19,12 @@ mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1
 I just wanted to make a plot for level of each site. 
 
 ```{r}
-ggplot(mydata, aes(x = site_name, y = altitude.m._of_main_layer)) +
-  geom_point() 
-  
+ggplot(mydata, 
+       aes(x = reorder(site_name, altitude.m._of_main_layer),
+           y = altitude.m._of_main_layer)) +
+  geom_point() +
+  coord_flip() +
+  xlab("Site name") +
+  ylab("Elevation above sea level (m)") +
+  theme_minimal(base_size = 16)
 ```
