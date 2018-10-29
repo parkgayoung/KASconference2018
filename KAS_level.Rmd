@@ -1,0 +1,25 @@
+---
+title: "KAS_level"
+author: "Gayoung Park"
+date: "10/29/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(plyr)
+library(rvest)
+suppressMessages(library(tidyverse))
+
+#data from PhD data sheet, not KAS sheet.
+mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=0&single=true&output=csv")
+
+```
+
+I just wanted to make a plot for level of each site. 
+
+```{r}
+ggplot(mydata, aes(x = site_name, y = altitude.m._of_main_layer)) +
+  geom_point() 
+  
+```
