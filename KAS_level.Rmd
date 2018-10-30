@@ -6,9 +6,6 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-
-library(plyr)
-library(rvest)
 suppressMessages(library(tidyverse))
 
 #data from PhD data sheet, not KAS sheet.
@@ -19,25 +16,34 @@ kasr <- read.csv ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1
 
 ```
 
-I just wanted to make a plot for level of each site. 
+I just wanted to make a plot for elevation of each site, and show is there is a relationship between the time of first occupation and elevation. In this plot we see a steady relationship between the elevation of sites and the time of occupation. There are no strong directional trends. It suggests a constant preference for site elevation over time. 
 
 ```{r}
-ggplot(mydata, 
-       aes(x = reorder(site_name, altitude.m._of_main_layer),
+mydata_ages <- 
+  mydata %>% 
+  separate(C14.BP., into = c('age', 'error'),
+          sep = "±") %>% 
+  mutate(age_ka = parse_number(age) / 1000,
+         error = parse_number(error)) %>% 
+  mutate(has_sp = ifelse(!is.na(SP.), "yes", "no"))
+
+ggplot(mydata_ages, 
+       aes(x = age_ka,
            y = altitude.m._of_main_layer)) +
   geom_point() +
-  coord_flip() +
-  xlab("Site name") +
+  xlab("Age of occupation (ka)") +
   ylab("Elevation above sea level (m)") +
+  geom_smooth() +
   theme_minimal(base_size = 16)
 ```
 
 Without order of the site and colored SP..
 
 ```{r}
-ggplot(mydata, 
+ggplot(mydata_ages, 
        aes(x = site_name,
-           y = altitude.m._of_main_layer, color = SP.)) +
+           y = altitude.m._of_main_layer, 
+           color = as.factor(has_sp))) +
   geom_point() +
   coord_flip() +
   xlab("Site name") +
@@ -48,7 +54,8 @@ ggplot(mydata,
 Using raw material information sheeet from KAS data sheets. I don't know how to import whole sheets with multiple sub-sheets. I need to use other sheets too.
 
 ```{r}
-ggplot(kasr, aes (x = X, y=)) +
+ggplot(kasr, 
+       aes(X)) +
   geom_histogram() +
   xlab("Site name") +
   ylab("Raw material type")
