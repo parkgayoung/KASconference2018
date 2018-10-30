@@ -14,6 +14,9 @@ suppressMessages(library(tidyverse))
 #data from PhD data sheet, not KAS sheet.
 mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=0&single=true&output=csv")
 
+#dafa from KAS data sheet.
+kasr <- read.csv ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=1950751706&single=true&output=csv")
+
 ```
 
 I just wanted to make a plot for level of each site. 
@@ -27,4 +30,27 @@ ggplot(mydata,
   xlab("Site name") +
   ylab("Elevation above sea level (m)") +
   theme_minimal(base_size = 16)
+```
+
+Without order of the site and colored SP..
+
+```{r}
+ggplot(mydata, 
+       aes(x = site_name,
+           y = altitude.m._of_main_layer, color = SP.)) +
+  geom_point() +
+  coord_flip() +
+  xlab("Site name") +
+  ylab("Elevation above sea level (m)") +
+  theme_minimal(base_size = 16)
+```
+
+Using raw material information sheeet from KAS data sheets. I don't know how to import whole sheets with multiple sub-sheets. I need to use other sheets too.
+
+```{r}
+ggplot(kasr, aes (x = X, y=)) +
+  geom_histogram() +
+  xlab("Site name") +
+  ylab("Raw material type")
+
 ```
