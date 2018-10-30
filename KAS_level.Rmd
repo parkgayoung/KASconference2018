@@ -12,7 +12,7 @@ suppressMessages(library(tidyverse))
 mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=0&single=true&output=csv")
 
 #dafa from KAS data sheet.
-kasr <- read.csv ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=1950751706&single=true&output=csv")
+kasr <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=1950751706&single=true&output=csv")
 
 ```
 
@@ -33,21 +33,32 @@ ggplot(mydata_ages,
        aes(x = age_ka,
            y = altitude.m._of_main_layer,
        color = as.factor(has_sp))) +
-  geom_point() +
+  geom_point(size = 3) +
   xlab("Age of occupation (ka)") +
   ylab("Elevation above sea level (m)") +
   geom_smooth(se = FALSE) +
-  theme_minimal(base_size = 16)
+  scale_colour_discrete(name = "Contains\nstemmed\npoints?") +
+  theme_minimal(base_size = 16) 
 ```
 
 
-Using raw material information sheeet from KAS data sheets. I don't know how to import whole sheets with multiple sub-sheets. I need to use other sheets too.
+Using raw material information sheeet from KAS data sheets.
 
 ```{r}
-ggplot(kasr, 
-       aes(X)) +
-  geom_histogram() +
-  xlab("Site name") +
-  ylab("Raw material type")
+kasr_long <- 
+  kasr %>% 
+  gather(site, 
+         count, 
+         -X) %>% 
+  filter(!is.na(count))
 
+ggplot(kasr_long, 
+       aes(site, 
+           count,
+           fill = X)) +
+  geom_col() +
+  xlab("Site name") +
+  ylab("Frequency") +
+  scale_fill_discrete(name = "Raw material type") +
+  theme_minimal(base_size = 16) 
 ```
