@@ -115,7 +115,8 @@ ggplot(kasa_long,
   theme_minimal(base_size = 16) 
 ```
 
-Volume and artefact counts to get density over time. I think we need to have a plot of density by retouched pieces, isn't that what Barton et al have?
+Volume and artefact counts to get density over time. 
+
 
 
 ```{r}
