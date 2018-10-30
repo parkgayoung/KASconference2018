@@ -109,7 +109,6 @@ ggplot(kasa_long,
            percentage,
            fill = artefact_type)) +
   geom_col() +
-  xlab("") +
   ylab("Percentage") +
   xlab("Age of assemblage (ka)") +
   scale_fill_viridis_d(name = "Artifact type")  +
@@ -138,6 +137,9 @@ ggplot(kasv_tidy,
   geom_text_repel(aes(label = sites),
                   nudge_x = 0.25, 
                   nudge_y = 0.25) +
+  ylab("Arefact density") +
+  xlab("Age of assemblage (ka)") +
+  scale_size_continuous(name = "Total number\nof artefacts")  +
   theme_minimal(base_size = 16)
 
 ```
