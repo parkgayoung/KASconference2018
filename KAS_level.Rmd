@@ -117,8 +117,6 @@ ggplot(kasa_long,
 
 Volume and artefact counts to get density over time. 
 
-
-
 ```{r}
 kasv_tidy <- 
 kasv %>% 
@@ -144,4 +142,109 @@ ggplot(kasv_tidy,
   theme_minimal(base_size = 16)
 
 ```
+
+Compute artefact volumetric density by frequency of retouched piece (log scale), following Julien Riel-Salvatore and C. Michael Barton in  https://www.jstor.org/stable/4128419
+
+```{r}
+# we'll use googlesheets package to get the data more efficiently
+library(googlesheets)
+
+# here is the key to the google sheet
+kas_sites <- gs_key("14G0Mp-YSsKBOBPF1Z1zPWQbZQ-sjJSWLetDIQSlbsjw")
+
+# get the tab names from this sheet
+kas_sites_names <- gs_ws_ls(kas_sites)
+
+# get the data from the tabs in this sheet!
+kas_sites_sheets <- 
+  map(kas_sites_names[1:4], ~kas_sites %>% gs_read_listfeed(ws = .x))
+
+# put the site names on this list of data frames
+names(kas_sites_sheets) <- kas_sites_names[1:4]
+
+# convert list of dataframes into one big dataframe
+kas_sites_sheets_altogether <- 
+kas_sites_sheets %>% 
+  # we need to make the report_id as character, since some are integer
+  map(~.x %>% mutate(report_id = as.character(report_id),
+                     layer = as.character(layer))) %>% 
+  bind_rows(.id = 'site')
+
+# make a new col with recode artefact type as retouch and non-retouch
+kas_sites_sheets_altogether <- 
+  kas_sites_sheets_altogether %>% 
+  mutate(retouch = ifelse(name %in% c("side_scraper",  
+                                      "end_scraper", 
+                                      "notch",  
+                                      "awl", 
+                                      "stemmed point",
+                                      "point",
+                                      "burin",
+                                      "side scraper",
+                                      "denticulate", 
+                                      "end scraper",
+                                      "stemmed points"), 
+                          'retouched',
+                          'non-retouched'))
+
+# frequency of retouched pieces per site & density
+kas_sites_sheets_altogether_density <- 
+kas_sites_sheets_altogether %>% 
+  mutate(sites = as.character(glue('{site}_{layer}'))) %>% 
+  mutate(sites = str_replace_all(sites, "_NA", "")) %>% 
+  group_by(sites, retouch) %>% 
+  tally() %>% 
+  spread(retouch, n) %>% 
+  mutate(proportion_retouched = retouched / `non-retouched`) %>% 
+  # join with density data
+  left_join(kasv_tidy, by = c('sites' = 'sites'))
+
+# compute correlation
+kas_sites_retouch_density_corr <- 
+cor.test(kas_sites_sheets_altogether_density$retouched,
+         kas_sites_sheets_altogether_density$artefact_density)
+
+r_value <- unname(kas_sites_retouch_density_corr$estimate)
+size <-  8
+
+ggplot(kas_sites_sheets_altogether_density,
+       aes(retouched,
+           artefact_density 
+           )) +
+  geom_point(size = 4,
+             aes(colour = date_age / 1000)) +
+  geom_text_repel(aes(label = sites),
+                  nudge_x = 0.075, 
+                  nudge_y = -0.075,
+                  size = 6) +
+  scale_y_log10() +
+  scale_x_log10() +
+  theme_minimal(base_size = 16) +
+  scale_colour_continuous(name = "Age of\nassemblage (ka)")  +
+  xlab("Artefact volumetric density") +
+  ylab("Frequency of retouched pieces") +
+  annotate("text",
+           x = 4,
+           y = 3,
+           label = "Curated",
+           size = size,
+           colour = "grey50") +
+    annotate("text",
+           x = 21,
+           y = 0.1,
+           label = "Expedient",
+           size = size,
+           colour = "grey50") +
+    annotate("text",
+           x = 4,
+           y = 0.1,
+           label = glue('r = {round(r_value, 3)}'),
+           size = size - 2,
+           colour = "grey50")
+
+```
+
+
+
+
 
