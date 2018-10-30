@@ -16,7 +16,10 @@ kasr <- read.csv ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1
 
 ```
 
-I just wanted to make a plot for elevation of each site, and show is there is a relationship between the time of first occupation and elevation. In this plot we see a steady relationship between the elevation of sites and the time of occupation. There are no strong directional trends. It suggests a constant preference for site elevation over time. 
+I just wanted to make a plot for elevation of each site, and show is there is a relationship between the time of first occupation and elevation, and whether or not there are stemmed points.
+
+We can see that 
+
 
 ```{r}
 mydata_ages <- 
@@ -29,27 +32,15 @@ mydata_ages <-
 
 ggplot(mydata_ages, 
        aes(x = age_ka,
-           y = altitude.m._of_main_layer)) +
+           y = altitude.m._of_main_layer,
+       color = as.factor(has_sp))) +
   geom_point() +
   xlab("Age of occupation (ka)") +
   ylab("Elevation above sea level (m)") +
-  geom_smooth() +
+  geom_smooth(se = FALSE) +
   theme_minimal(base_size = 16)
 ```
 
-Without order of the site and colored SP..
-
-```{r}
-ggplot(mydata_ages, 
-       aes(x = site_name,
-           y = altitude.m._of_main_layer, 
-           color = as.factor(has_sp))) +
-  geom_point() +
-  coord_flip() +
-  xlab("Site name") +
-  ylab("Elevation above sea level (m)") +
-  theme_minimal(base_size = 16)
-```
 
 Using raw material information sheeet from KAS data sheets. I don't know how to import whole sheets with multiple sub-sheets. I need to use other sheets too.
 
