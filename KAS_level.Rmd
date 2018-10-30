@@ -18,8 +18,7 @@ kasr <- read.csv ("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1
 
 I just wanted to make a plot for elevation of each site, and show is there is a relationship between the time of first occupation and elevation, and whether or not there are stemmed points.
 
-We can see that 
-
+We can see that the sites without stemmed points are earlier, and at high elevations. But then after stemmed points appear, the sites without stemmed points are only found at low elevations, and the stem point sites are at higher elevations. So it might suggest that the stemmed point was an important artefact for adapting to high elevations, especially into the period of the Last Glacial Maximum. 
 
 ```{r}
 mydata_ages <- 
