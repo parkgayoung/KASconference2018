@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 suppressMessages(library(tidyverse))
+library(glue)
 
 #data from PhD data sheet, not KAS sheet.
 mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=0&single=true&output=csv")
@@ -50,15 +51,20 @@ kasr_long <-
   gather(site, 
          count, 
          -X) %>% 
-  filter(!is.na(count))
+  group_by(site) %>% 
+  mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
+         total = sum(count, na.rm = TRUE)) %>% 
+  filter(!is.na(percentage)) %>% 
+  mutate(axis_label = glue('{site}\n(n = {total})'))
+
 
 ggplot(kasr_long, 
-       aes(site, 
-           count,
+       aes(axis_label, 
+           percentage,
            fill = X)) +
   geom_col() +
   xlab("Site name") +
-  ylab("Frequency") +
+  ylab("Percentage") +
   scale_fill_discrete(name = "Raw material type") +
   theme_minimal(base_size = 16) 
 ```
