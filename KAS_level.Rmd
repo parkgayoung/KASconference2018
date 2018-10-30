@@ -70,11 +70,11 @@ kasr_long <-
 
 
 ggplot(kasr_long, 
-       aes(reorder(axis_label, age_ka),
+       aes(age_ka,
            percentage,
            fill = raw_material)) +
   geom_col() +
-  xlab("") +
+  xlab("Age of assemblage (ka)") +
   ylab("Percentage") +
   scale_fill_viridis_d(name = "Raw material type") +
   theme_minimal(base_size = 16) 
@@ -105,12 +105,13 @@ kasa_long <-
   arrange(age_ka)
 
 ggplot(kasa_long, 
-       aes(reorder(axis_label, age_ka), 
+       aes(age_ka, 
            percentage,
            fill = artefact_type)) +
   geom_col() +
   xlab("") +
   ylab("Percentage") +
+  xlab("Age of assemblage (ka)") +
   scale_fill_viridis_d(name = "Artifact type")  +
   theme_minimal(base_size = 16) 
 ```
