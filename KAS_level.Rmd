@@ -60,6 +60,8 @@ kasr_long <-
   mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
          total = sum(count, na.rm = TRUE)) %>% 
   filter(!is.na(percentage)) %>% 
+  # if percentage is <10%, call it 'other'
+  mutate(raw_material = ifelse(percentage >= 10, as.character(X), "other")) %>% 
   mutate(axis_label = glue('{site}\n(n = {total})')) %>% 
   # join to get ages of the sites
   left_join(mydata_ages, 
@@ -70,11 +72,11 @@ kasr_long <-
 ggplot(kasr_long, 
        aes(reorder(axis_label, age_ka),
            percentage,
-           fill = X)) +
+           fill = raw_material)) +
   geom_col() +
   xlab("") +
   ylab("Percentage") +
-  scale_fill_discrete(name = "Raw material type") +
+  scale_fill_viridis_d(name = "Raw material type") +
   theme_minimal(base_size = 16) 
 ```
 
@@ -91,6 +93,11 @@ kasa_long <-
   mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
          total = sum(count, na.rm = TRUE)) %>% 
   filter(!is.na(percentage)) %>% 
+  # if percentage is <10%, call it 'other'
+  mutate(artefact_type = ifelse(as.character(X) == 'stemmed_point',
+                                'stemmed_point', 
+                                ifelse(percentage >= 10, 
+                                as.character(X), "other"))) %>% 
   mutate(axis_label = glue('{site}\n(n = {total})'))  %>% 
   # join to get ages of the sites
   left_join(mydata_ages, 
@@ -99,12 +106,12 @@ kasa_long <-
 
 ggplot(kasa_long, 
        aes(reorder(axis_label, age_ka), 
-           count,
-           fill = X)) +
+           percentage,
+           fill = artefact_type)) +
   geom_col() +
   xlab("") +
-  ylab("Frequency") +
-  scale_fill_discrete(name = "Artifact type")  +
+  ylab("Percentage") +
+  scale_fill_viridis_d(name = "Artifact type")  +
   theme_minimal(base_size = 16) 
 ```
 
