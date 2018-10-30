@@ -9,13 +9,13 @@ output: html_document
 suppressMessages(library(tidyverse))
 library(glue)
 
-#data from PhD data sheet, not KAS sheet.
+# data from PhD data sheet, not KAS sheet.
 mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=0&single=true&output=csv")
 
-#raw material data from KAS data sheet.
+# raw material data from KAS data sheet.
 kasr <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=1950751706&single=true&output=csv")
 
-#assemblage composition data from KAS data sheet.
+# assemblage composition data from KAS data sheet.
 kasa <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=1138475249&single=true&output=csv")
 
 ```
@@ -45,7 +45,6 @@ ggplot(mydata_ages,
   theme_minimal(base_size = 16) 
 ```
 
-
 Using raw material information sheeet from KAS data sheets.
 
 ```{r}
@@ -58,15 +57,19 @@ kasr_long <-
   mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
          total = sum(count, na.rm = TRUE)) %>% 
   filter(!is.na(percentage)) %>% 
-  mutate(axis_label = glue('{site}\n(n = {total})'))
+  mutate(axis_label = glue('{site}\n(n = {total})')) %>% 
+  # join to get ages of the sites
+  left_join(mydata_ages, 
+            by = c('site' = 'site_name')) %>% 
+  arrange(age_ka)
 
 
 ggplot(kasr_long, 
-       aes(axis_label, 
+       aes(reorder(axis_label, age_ka),
            percentage,
            fill = X)) +
   geom_col() +
-  xlab("Site name") +
+  xlab("") +
   ylab("Percentage") +
   scale_fill_discrete(name = "Raw material type") +
   theme_minimal(base_size = 16) 
@@ -80,13 +83,24 @@ kasa_long <-
   gather(site, 
          count, 
          -X) %>% 
-  filter(!is.na(count))
+  filter(!is.na(count)) %>% 
+  group_by(site) %>% 
+  mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
+         total = sum(count, na.rm = TRUE)) %>% 
+  filter(!is.na(percentage)) %>% 
+  mutate(axis_label = glue('{site}\n(n = {total})'))  %>% 
+  # join to get ages of the sites
+  left_join(mydata_ages, 
+            by = c('site' = 'site_name')) %>% 
+  arrange(age_ka)
 
 ggplot(kasa_long, 
-       aes(site, 
+       aes(reorder(axis_label, age_ka), 
            count,
            fill = X)) +
   geom_col() +
-  xlab("Site name") +
+  xlab("") +
   ylab("Frequency") +
-  scale_fill_discrete(name = "artifact type") 
+  scale_fill_discrete(name = "Artifact type")  +
+  theme_minimal(base_size = 16) 
+```
