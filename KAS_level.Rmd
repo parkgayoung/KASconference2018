@@ -116,3 +116,29 @@ ggplot(kasa_long,
   theme_minimal(base_size = 16) 
 ```
 
+Volume and artefact counts to get density over time. I think we need to have a plot of density by retouched pieces, isn't that what Barton et al have?
+
+
+```{r}
+kasv_tidy <- 
+kasv %>% 
+  t %>% 
+  as_tibble() %>% 
+  setNames(as.character(.[1,])) %>% 
+  .[-1,] %>% 
+  mutate_all(parse_number) %>% 
+  mutate(artefact_density = total_artifacts / volume,
+         sites = names(kasv)[-1])
+
+library(ggrepel)
+ggplot(kasv_tidy,
+       aes(date_age,
+           artefact_density)) +
+  geom_point(aes(size = total_artifacts)) +
+  geom_text_repel(aes(label = sites),
+                  nudge_x = 0.25, 
+                  nudge_y = 0.25) +
+  theme_minimal(base_size = 16)
+
+```
+
