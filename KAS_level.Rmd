@@ -18,6 +18,9 @@ kasr <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1q
 # assemblage composition data from KAS data sheet.
 kasa <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=1138475249&single=true&output=csv")
 
+#volume of the cultural layer from KAS data sheet.
+kasv <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=166963492&single=true&output=csv")
+
 ```
 
 I just wanted to make a plot for elevation of each site, and show is there is a relationship between the time of first occupation and elevation, and whether or not there are stemmed points.
@@ -104,3 +107,4 @@ ggplot(kasa_long,
   scale_fill_discrete(name = "Artifact type")  +
   theme_minimal(base_size = 16) 
 ```
+
