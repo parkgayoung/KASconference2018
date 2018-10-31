@@ -69,7 +69,7 @@ kasr_long <-
             by = c('site' = 'site_name')) %>% 
   arrange(age_ka)
 
-
+kasr_long_plot <- 
 ggplot(kasr_long, 
        aes(age_ka,
            percentage,
@@ -77,8 +77,37 @@ ggplot(kasr_long,
   geom_col() +
   xlab("Age of assemblage (ka)") +
   ylab("Percentage") +
-  scale_fill_viridis_d(name = "Raw material type") +
+  scale_fill_viridis_d(name = "Raw material type",
+                       option = "C") +
+  coord_cartesian(xlim = c(25, 45)) +
   theme_minimal(base_size = 16) 
+
+kasr_long_plot
+```
+
+How does it look in context of global Oxygen isotope levels? Not very interesting.
+
+```{r}
+library(gsloid)
+
+lisiecki2005_plot <- 
+ggplot(lisiecki2005, 
+       aes(Time,
+           d18O)) +
+  geom_line() +
+  scale_x_continuous(limits = c(kasr_long_plot$coordinates$limits$x[1], 
+                                kasr_long_plot$coordinates$limits$x[2]),
+                     name = "x 1000 years ago") +
+  scale_y_reverse(name = bquote(delta^18*O)) +
+  theme_bw()
+
+library(patchwork)
+kasr_long_plot + 
+  lisiecki2005_plot + 
+  plot_layout(ncol = 1,
+              heights = c(3, 1))
+
+
 ```
 
 The following plot is representing the artifact composition of each sites to figure out what people did as they were occupying the sites.
