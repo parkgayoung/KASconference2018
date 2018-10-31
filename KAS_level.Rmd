@@ -114,6 +114,7 @@ ggplot(kasa_long,
   xlab("Age of assemblage (ka)") +
   scale_fill_viridis_d(name = "Artifact type")  +
   theme_minimal(base_size = 16) 
+
 ```
 
 Volume and artefact counts to get density over time. 
@@ -246,6 +247,6 @@ ggplot(kas_sites_sheets_altogether_density,
 
 ```
 
-
+Artefact volumetric density and frequency of retouched pieces can be proxies to identify the characteristics of the hunter-gatherers who carried that stone tools whether they are residentially mobile or logistically orgnized foragers based on the premise that the relationship between lithic assemblage composition and land-use strategy represent an expression of economizing behavior. 
 
 
