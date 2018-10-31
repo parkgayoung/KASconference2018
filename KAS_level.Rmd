@@ -258,7 +258,7 @@ ggplot(kas_sites_sheets_altogether_density,
 
 Artefact volumetric density and frequency of retouched pieces can be proxies to identify the characteristics of the hunter-gatherers who carried that stone tools whether they are residentially mobile or logistically orgnized foragers based on the premise that the relationship between lithic assemblage composition and land-use strategy represent an expression of economizing behavior. 
 
-<<<<<<< HEAD
+
 The artefact volumetric density is defied as the total number of artefacts per cubic meter of excavated sediment, and served as a proxy for accumulation ratio of artefacts. the relative frequency of retouched pieces is the count of retouched flake tools devided by the total number of artifacts. 
 
 The two ends of the curated-expedient show that residential to logistical mobility. Expedient assemblages can be depicted as "base camps" or "residences", while curated ones represent either residential mobility, where the central locus of group changes frequently, or certain task groups from a central residential site. 
@@ -266,5 +266,3 @@ The two ends of the curated-expedient show that residential to logistical mobili
 The plot show that younger sites are likely to be used as base camp than older site, which means that people tended to stay longer at one place after around 40-35ka. 
 
 (Riel-Salvatore and Barton 2004)
-=======
->>>>>>> a2660d24190c122c94133893fc4cbdde171c8378
