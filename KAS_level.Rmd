@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 suppressMessages(library(tidyverse))
 library(glue)
+library(ggrepel)
 
 # data from PhD data sheet, not KAS sheet.
 mydata  <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=0&single=true&output=csv")
@@ -112,7 +113,7 @@ ggplot(kasa_long,
   geom_col() +
   ylab("Percentage") +
   xlab("Age of assemblage (ka)") +
-  scale_fill_viridis_d(name = "Artifact type")  +
+  labs(fill="Artifact type")+
   theme_minimal(base_size = 16) 
 
 ```
@@ -130,7 +131,7 @@ kasv %>%
   mutate(artefact_density = total_artifacts / volume,
          sites = names(kasv)[-1])
 
-library(ggrepel)
+
 ggplot(kasv_tidy,
        aes(date_age,
            artefact_density)) +
@@ -219,7 +220,7 @@ ggplot(kas_sites_sheets_altogether_density,
   geom_text_repel(aes(label = sites),
                   nudge_x = 0.075, 
                   nudge_y = -0.075,
-                  size = 6) +
+                  size = 5) +
   scale_y_log10() +
   scale_x_log10() +
   theme_minimal(base_size = 12) +
@@ -230,13 +231,13 @@ ggplot(kas_sites_sheets_altogether_density,
            x = 4,
            y = 3,
            label = "Curated",
-           size = size,
+           size = size -2,
            colour = "grey50") +
     annotate("text",
            x = 21,
            y = 0.1,
            label = "Expedient",
-           size = size,
+           size = size -2,
            colour = "grey50") +
     annotate("text",
            x = 4,
@@ -249,4 +250,10 @@ ggplot(kas_sites_sheets_altogether_density,
 
 Artefact volumetric density and frequency of retouched pieces can be proxies to identify the characteristics of the hunter-gatherers who carried that stone tools whether they are residentially mobile or logistically orgnized foragers based on the premise that the relationship between lithic assemblage composition and land-use strategy represent an expression of economizing behavior. 
 
+The artefact volumetric density is defied as the total number of artefacts per cubic meter of excavated sediment, and served as a proxy for accumulation ratio of artefacts. the relative frequency of retouched pieces is the count of retouched flake tools devided by the total number of artifacts. 
 
+The two ends of the curated-expedient show that residential to logistical mobility. Expedient assemblages can be depicted as "base camps" or "residences", while curated ones represent either residential mobility, where the central locus of group changes frequently, or certain task groups from a central residential site. 
+
+The plot show that younger sites are likely to be used as base camp than older site, which means that people tended to stay longer at one place after around 40-35ka. 
+
+(Riel-Salvatore and Barton 2004)
