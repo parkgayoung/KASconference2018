@@ -80,6 +80,7 @@ ggplot(kasr_long,
   ylab("Percentage") +
   scale_fill_viridis_d(name = "Raw material type") +
   theme_minimal(base_size = 16) 
+  
 ```
 
 The following plot is representing the artifact composition of each sites to figure out what people did as they were occupying the sites.
@@ -99,7 +100,7 @@ kasa_long <-
   mutate(artefact_type = ifelse(as.character(X) == 'stemmed_point',
                                 'stemmed_point', 
                                 ifelse(percentage >= 10, 
-                                as.character(X), "other"))) %>% 
+                                as.character(X), "other_tools"))) %>% 
   mutate(axis_label = glue('{site}\n(n = {total})'))  %>% 
   # join to get ages of the sites
   left_join(mydata_ages, 
