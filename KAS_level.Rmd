@@ -144,8 +144,7 @@ ggplot(kasv_tidy,
 
 ```
 
-
-Compute artefact volumetric density by frequency of retouched piece (log scale), following Julien Riel-Salvatore and C. Michael Barton in  https://www.jstor.org/stable/4128419
+Get the lithic data for some sites:
 
 ```{r}
 # we'll use googlesheets package to get the data more efficiently
@@ -160,7 +159,11 @@ kas_sites_names <- gs_ws_ls(kas_sites)
 # get the data from the tabs in this sheet!
 kas_sites_sheets <- 
   map(kas_sites_names[1:4], ~kas_sites %>% gs_read_listfeed(ws = .x))
+```
 
+Compute artefact volumetric density by frequency of retouched piece (log scale), following Julien Riel-Salvatore and C. Michael Barton in  https://www.jstor.org/stable/4128419
+
+```{r}
 # put the site names on this list of data frames
 names(kas_sites_sheets) <- kas_sites_names[1:4]
 
@@ -207,6 +210,11 @@ cor.test(kas_sites_sheets_altogether_density$retouched,
          kas_sites_sheets_altogether_density$artefact_density)
 
 r_value <- unname(kas_sites_retouch_density_corr$estimate)
+```
+
+And plot it
+
+```{r}
 size <-  8
 
 ggplot(kas_sites_sheets_altogether_density,
@@ -222,7 +230,7 @@ ggplot(kas_sites_sheets_altogether_density,
   scale_y_log10() +
   scale_x_log10() +
   theme_minimal(base_size = 12) +
-  scale_colour_continuous(name = "Age of\nassemblage (ka)")  +
+  scale_color_viridis_c(name = "Age of\nassemblage (ka)") +
   xlab("Artefact volumetric density") +
   ylab("Frequency of retouched pieces") +
   annotate("text",
@@ -247,5 +255,5 @@ ggplot(kas_sites_sheets_altogether_density,
 ```
 
 
-
+a small change
 
