@@ -22,6 +22,7 @@ kasa <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1q
 #volume of the cultural layer from KAS data sheet.
 kasv <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vQQ9zhSCHjt-1qdSLltD1rhEI_DmaIKtah5yA9WWlsB0gGJWMOYltZR71r00NgkfaYz8YH392oZOWPu/pub?gid=166963492&single=true&output=csv")
 
+dates <- read.csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vRBTqiIHQP1Pg3De1IGsJgVFiJla1dIHyHsGEsSmel8WVAeXXXHmSiyNnQAad9ATdzeukS43WE3PZ2m/pub?gid=1393178538&single=true&output=csv")
 
 ```
 
@@ -314,9 +315,76 @@ Artefact volumetric density and frequency of retouched pieces can be proxies to 
 
 The artefact volumetric density is defined as the total number of artefacts per cubic meter of excavated sediment, and served as a proxy for accumulation ratio of artefacts. the relative frequency of retouched pieces is the count of retouched flake tools devided by the total number of artifacts. 
 
-
 The two ends of the curated-expedient show that residential to logistical mobility. Expedient assemblages can be depicted as "base camps" or "residences", while curated ones represent either residential mobility, where the central locus of group changes frequently, or certain task groups from a central residential site. 
 
 The plot show that younger sites are likely to be used as base camp than older site, which means that people tended to stay longer at one place after around 40-35ka. 
 
 (Riel-Salvatore and Barton 2004)
+
+
+```{r}
+dates_clean <- 
+  dates %>% 
+  mutate(age = parse_number(as.character(age)),
+         error = parse_number(as.character(error))) %>% 
+  filter(age < 50000)
+  
+# devtools::install_github('ahb108/rcarbon')
+library(rcarbon)
+dates_calibrated <- 
+  calibrate(x=dates_clean$age,
+               errors=dates_clean$error,
+               calCurves='intcal13')
+
+dates_calibrated_spd <-  spd(dates_calibrated, timeRange = c( 45000, 1000))
+plot(dates_calibrated_spd)
+
+barCodes(x = medCal(dk.dates))
+```
+
+
+
+```{r}
+# dating
+library(rcarbon)
+
+# I'm working through https://cran.r-project.org/web/packages/rcarbon/vignettes/rcarbon.html
+
+kas_ages <- 
+kas_density_retouch_ages %>% 
+  select(sites, date_age, date_error) %>% 
+  mutate(sites = str_remove_all(sites, "_"))
+
+kas_caldates <- 
+  calibrate(x = kas_ages$date_age,
+            errors = kas_ages$date_error,
+            calCurves='intcal13',
+            ncores=3) #running calibration over 3 cores
+
+kas_spd = spd(kas_caldates, timeRange = c(50000,25000)) 
+plot(kas_spd)
+
+binsense(x=kas_caldates,
+         y=kas_ages$sites,
+         h=seq(0,5000,100),
+         timeRange=c(50000,25000)) 
+
+ggplot(kas_spd$grid,
+       aes(calBP,
+           PrDens)) +
+  geom_line() +
+  scale_y_log10(name = "Summed probability")
+
+
+# test how the SPD fits to an exponential growth model:
+expnull <- modelTest(kas_caldates, 
+                     errors=kas_ages$date_error, 
+                     nsim=100, 
+                     timeRange=c(50000,25000),
+                     model="uniform",
+                     runm=10)
+
+plot(expnull)
+
+```
+
