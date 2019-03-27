@@ -322,24 +322,3 @@ The plot show that younger sites are likely to be used as base camp than older s
 (Riel-Salvatore and Barton 2004)
 
 
-# Radiocarbon ages
-
-```{r}
-dates_clean <- 
-  dates %>% 
-  mutate(age = parse_number(as.character(age)),
-         error = parse_number(as.character(error))) %>% 
-  filter(age < 50000)
-  
-# devtools::install_github('ahb108/rcarbon')
-library(rcarbon)
-dates_calibrated <- 
-  calibrate(x=dates_clean$age,
-               errors=dates_clean$error,
-               calCurves='intcal13')
-
-dates_calibrated_spd <-  spd(dates_calibrated, timeRange = c( 45000, 1000))
-plot(dates_calibrated_spd)
-
-barCodes(x = medCal(dk.dates))
-```
