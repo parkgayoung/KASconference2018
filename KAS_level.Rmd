@@ -171,9 +171,9 @@ ggplot(kasv_tidy,
   geom_text_repel(aes(label = sites),
                   nudge_x = 0.25, 
                   nudge_y = 0.25) +
-  ylab("Arefact density") +
+  ylab("Artifact density") +
   xlab("Age of assemblage (ka)") +
-  scale_size_continuous(name = "Total number\nof artefacts")  +
+  scale_size_continuous(name = "Total number\nof artifacts")  +
   theme_minimal(base_size = 16)
 
 ```
@@ -288,7 +288,7 @@ ggplot(kas_density_retouch_ages,
                 labels = scales::comma_format(accuracy = 0.001)) +
   theme_minimal(base_size = 12) +
   scale_color_viridis_c(name = "Age of\nassemblage (ka)") +
-  xlab("Artefact volumetric density") +
+  xlab("Artifact volumetric density") +
   ylab("Proportion of retouched pieces") +
   annotate("text",
            x = 0.005,
