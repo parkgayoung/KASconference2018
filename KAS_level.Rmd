@@ -54,7 +54,7 @@ ggplot(mydata_ages,
 Using raw material information sheeet from KAS data sheets.
 
 ```{r}
-kasr_long <- 
+kasr_long1 <- 
   kasr %>% 
   gather(site, 
          count, 
@@ -63,30 +63,46 @@ kasr_long <-
   mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
          total = sum(count, na.rm = TRUE)) %>% 
   filter(!is.na(percentage)) %>% 
-  # if percentage is <10%, call it 'other'
   mutate(raw_material = ifelse(percentage >= 10, as.character(X), "other")) %>% 
-  mutate(axis_label = glue('{site}\n(n = {total})')) %>% 
+  mutate(raw_material = ifelse(raw_material == "etc.", "other", raw_material)) %>% 
+  select(-X)
+
+
+  # if percentage is <10%, call it 'other'
+kasr_long2 <- 
+  kasr_long1 %>% 
+  group_by(site, raw_material) %>% 
+  summarise(percentage = sum(percentage)) %>% 
+  ungroup() %>% 
+  left_join(kasr_long1 %>% 
+              select(site, raw_material, total),
+            by = c('site', "raw_material")) %>% 
+  distinct(.keep_all = TRUE) %>% 
+
   # join to get ages of the sites
   left_join(mydata_ages, 
             by = c('site' = 'site_name')) %>% 
-  arrange(age_ka)
+  mutate(age_ka = jitter(age_ka),
+         age_bin  = ntile(age_ka, 5)) %>% 
+  arrange(age_ka) %>% 
+  filter(!is.na(age_ka)) %>% 
+    mutate(axis_label = glue('{site} ({round(age_ka,1)} ka, n = {total})')) 
 
-kasr_long_plot <- 
-ggplot(kasr_long, 
-       aes(age_ka,
+
+ggplot(kasr_long2, 
+       aes(
+           reorder(axis_label, -age_ka),
            percentage,
            fill = raw_material)) +
-  geom_col() +
-  xlab("Age of assemblage (ka)") +
+  geom_col(position = "fill") +
+  xlab("Assemblage (youngest at the top)") +
   ylab("Percentage") +
   scale_fill_viridis_d(name = "Raw material type",
                        option = "C") +
-  coord_cartesian(xlim = c(25, 45)) +
-  theme_minimal(base_size = 16) 
+  coord_flip() +
+  theme_minimal(base_size = 12) 
 
-
-
-kasr_long_plot
+ggsave("KAS/raw-materials.png")
 ```
 
 How does it look in context of global Oxygen isotope levels?? Not very interesting.
@@ -136,7 +152,8 @@ kasa_long <-
   # join to get ages of the sites
   left_join(mydata_ages, 
             by = c('site' = 'site_name')) %>% 
-  arrange(age_ka)
+  arrange(age_ka) %>% 
+   mutate(age_ka = jitter(age_ka))
 
 ggplot(kasa_long, 
        aes(age_ka, 
