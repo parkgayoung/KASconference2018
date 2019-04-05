@@ -46,9 +46,14 @@ ggplot(mydata_ages,
   geom_point(size = 3) +
   xlab("Age of occupation (ka)") +
   ylab("Elevation above sea level (m)") +
-  geom_smooth(se = FALSE) +
-  scale_colour_discrete(name = "Contains\nstemmed\npoints?") +
+  geom_smooth(se = FALSE, 
+              size = 3) +
+  scale_color_viridis_d(name = "Contains\nstemmed\npoints?",
+                        begin = 0.25, end = 0.75) +
   theme_minimal(base_size = 16) 
+
+ggsave("KAS/site-elevation.png", 
+       h = 5, w = 8)
 ```
 
 Using raw material information sheeet from KAS data sheets.
@@ -77,8 +82,7 @@ kasr_long2 <-
   left_join(kasr_long1 %>% 
               select(site, raw_material, total),
             by = c('site', "raw_material")) %>% 
-  distinct(.keep_all = TRUE) %>% 
-
+  distinct(.keep_all = TRUE) %>%
   # join to get ages of the sites
   left_join(mydata_ages, 
             by = c('site' = 'site_name')) %>% 
@@ -97,7 +101,7 @@ ggplot(kasr_long2,
   geom_col(position = "fill") +
   xlab("Assemblage (youngest at the top)") +
   ylab("Percentage") +
-  scale_fill_viridis_d(name = "Raw material type",
+  scale_fill_viridis_d(name = "Raw material\ntype",
                        option = "C") +
   coord_flip() +
   theme_minimal(base_size = 12) 
@@ -105,69 +109,60 @@ ggplot(kasr_long2,
 ggsave("KAS/raw-materials.png")
 ```
 
-How does it look in context of global Oxygen isotope levels?? Not very interesting.
-
-```{r}
-library(gsloid)
-
-lisiecki2005_plot <- 
-ggplot(lisiecki2005, 
-       aes(Time,
-           d18O)) +
-  geom_line() +
-  scale_x_continuous(limits = c(kasr_long_plot$coordinates$limits$x[1], 
-                                kasr_long_plot$coordinates$limits$x[2]),
-                     name = "x 1000 years ago") +
-  scale_y_reverse(name = bquote(delta^18*O)) +
-  theme_bw()
-
-library(patchwork)
-kasr_long_plot + 
-  lisiecki2005_plot + 
-  plot_layout(ncol = 1,
-              heights = c(3, 1))
-
-
-```
 
 The following plot is representing the artifact composition of each sites to figure out what people did as they were occupying the sites.
 
 ```{r}
-kasa_long <-
+kasa_long1 <-
   kasa %>%
   gather(site, 
          count, 
          -X) %>% 
   filter(!is.na(count)) %>% 
   group_by(site) %>% 
-  mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
+   mutate(percentage = count / sum(count, na.rm = TRUE) * 100,
          total = sum(count, na.rm = TRUE)) %>% 
   filter(!is.na(percentage)) %>% 
   # if percentage is <10%, call it 'other'
   mutate(artefact_type = ifelse(as.character(X) == 'stemmed_point',
                                 'stemmed_point', 
-                                ifelse(percentage >= 10, 
+                                ifelse(percentage >= 10 | X == "unkown", 
                                 as.character(X), "other_tools"))) %>% 
   mutate(axis_label = glue('{site}\n(n = {total})'))  %>% 
+  select(-X)
+
   # join to get ages of the sites
+kasa_long2 <- 
+kasa_long1 %>% 
+  group_by(site, 
+           artefact_type) %>% 
+  summarise(percentage = sum(percentage)) %>% 
   left_join(mydata_ages, 
             by = c('site' = 'site_name')) %>% 
   arrange(age_ka) %>% 
-   mutate(age_ka = jitter(age_ka))
+  distinct(.keep_all = TRUE) %>%
+  filter(!is.na(age_ka)) %>% 
+  mutate(axis_label = glue('{site} ({round(age_ka,1)} ka)')) 
 
-ggplot(kasa_long, 
-       aes(age_ka, 
+ggplot(kasa_long2, 
+       aes(
+           reorder(axis_label, -age_ka),
            percentage,
            fill = artefact_type)) +
-  geom_col() +
+  geom_col(position = "fill") +
   ylab("Percentage") +
-  xlab("Age of assemblage (ka)") +
-  labs(fill="Artifact type")+
-  theme_minimal(base_size = 16) 
+   xlab("Assemblage (youngest at the top)") +
+  theme_minimal(base_size = 16)  +
+    scale_fill_viridis_d(name = "Artefact type",
+                       option = "D") +
+  coord_flip() +
+  theme_minimal(base_size = 12) 
+
+ggsave("KAS/artefact-types.png")
 
 ```
 
-Volume and artefact counts to get density over time. 
+Volume and artefact counts to get density over time, see further down for the one on the poster
 
 ```{r}
 kasv_tidy <- 
@@ -180,19 +175,16 @@ kasv %>%
   mutate(artefact_density = total_artifacts / volume,
          sites = names(kasv)[-1])
 
-
 ggplot(kasv_tidy,
-       aes(date_age,
+       aes(date_age / 1000,
            artefact_density)) +
   geom_point(aes(size = total_artifacts)) +
-  geom_text_repel(aes(label = sites),
-                  nudge_x = 0.25, 
-                  nudge_y = 0.25) +
-  ylab("Artifact density") +
-  xlab("Age of assemblage (ka)") +
-  scale_size_continuous(name = "Total number\nof artifacts")  +
+  ylab("Artefact density") +
+  xlab("Age of assemblage (ka)") + 
+  scale_size_continuous(name = "Total number\nof artefacts")  +
   theme_minimal(base_size = 16)
 
+ggsave("KAS/age-by-density.png")
 ```
 
 Get the lithic data for some sites:
@@ -279,13 +271,15 @@ cor.test(kas_density_retouch_ages$proportion_retouched,
          kas_density_retouch_ages$density)
 
 r_value <- unname(kas_sites_retouch_density_corr$estimate)
+p_value <- unname(kas_sites_retouch_density_corr$p.value )
+t_value <- unname(kas_sites_retouch_density_corr$statistic )
+df_value <- unname(kas_sites_retouch_density_corr$parameter )
 
 ```
 
 
 ```{r}
 size <-  8
-
 
 ggplot(kas_density_retouch_ages,
        aes(density,
@@ -294,85 +288,37 @@ ggplot(kas_density_retouch_ages,
   geom_point(aes(colour = date_age / 1000,
                  size = total_artifacts,
                  shape = is.na(stemmed_point))) +
- # geom_text_repel(aes(label = sites),
- #                 nudge_x = 0.075, 
- #                 nudge_y = -0.075,
- #                 size = 5) +
-  geom_smooth(alpha = 0.2) +
+  geom_smooth(method = "lm", 
+              alpha = 0.2) +
   scale_y_log10(limits = c(0.001, 1),
                 labels = scales::comma_format(accuracy = 0.001)) +
   scale_x_log10(limits = c(0.001, 10),
                 labels = scales::comma_format(accuracy = 0.001)) +
   theme_minimal(base_size = 12) +
   scale_color_viridis_c(name = "Age of\nassemblage (ka)") +
+  guides(shape = FALSE) +
   xlab("Artifact volumetric density") +
   ylab("Proportion of retouched pieces") +
   annotate("text",
-           x = 0.005,
-           y = 0.7,
+           x = 0.003,
+           y = 0.9,
            label = "Curated",
-           size = size -2,
+           size = size -1,
            colour = "grey50") +
     annotate("text",
-           x = 5,
-           y = 0.01,
+           x = 3,
+           y = 0.002,
            label = "Expedient",
-           size = size -2,
+           size = size -1,
            colour = "grey50") +
     annotate("text",
-           x = 0.01,
+           x = 0.03,
            y = 0.01,
-           label = glue('r = {round(r_value, 3)}'),
+           label = glue('r = {round(r_value, 3)}\nt({df_value}) =  {round(t_value, 3)}, p = {round(p_value, 3)}'),
            size = size - 2,
            colour = "grey50")
 
-```
-
-```{r}
-# I wanna make simple table for artifact density and frequency of retouched pieces again. Because the complex table above is hard to make comments..
-
-
-
-
-ggplot(kas_density_retouch_ages,
-       aes(density,
-           proportion_retouched
-           )) +
-  geom_point(aes(colour = date_age / 1000,
-                 size = 7)) +
- # geom_text_repel(aes(label = sites),
- #                 nudge_x = 0.075, 
- #                 nudge_y = -0.075,
- #                 size = 5) +
-  geom_smooth(alpha = 0.2) +
-  scale_y_log10(limits = c(0.001, 1),
-                labels = scales::comma_format(accuracy = 0.001)) +
-  scale_x_log10(limits = c(0.001, 10),
-                labels = scales::comma_format(accuracy = 0.001)) +
-  theme_minimal(base_size = 12) +
-  scale_color_viridis_c(name = "Age of\nassemblage (ka)") +
-  xlab("Artifact volumetric density") +
-  ylab("Proportion of retouched pieces") +
-  annotate("text",
-           x = 0.005,
-           y = 0.7,
-           label = "Curated",
-           size = size -2,
-           colour = "grey50") +
-    annotate("text",
-           x = 5,
-           y = 0.01,
-           label = "Expedient",
-           size = size -2,
-           colour = "grey50") +
-    annotate("text",
-           x = 0.01,
-           y = 0.01,
-           label = glue('r = {round(r_value, 3)}'),
-           size = size - 2,
-           colour = "grey50")
-
-
+ggsave("KAS/assemblages-expedient-curated.png")
 
 ```
 
@@ -388,8 +334,6 @@ The plot show that younger sites are likely to be used as base camp than older s
 (Riel-Salvatore and Barton 2004)
 
 
-<<<<<<< HEAD
-=======
 ```{r}
 dates_clean <- 
   dates %>% 
